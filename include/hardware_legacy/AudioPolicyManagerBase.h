@@ -48,7 +48,7 @@ namespace android_audio_legacy {
 #define SONIFICATION_RESPECTFUL_AFTER_MUSIC_DELAY 5000
 // Time in milliseconds during witch some streams are muted while the audio path
 // is switched
-#define MUTE_TIME_MS 500
+#define MUTE_TIME_MS 2000
 
 #define NUM_TEST_OUTPUTS 5
 
@@ -159,6 +159,9 @@ protected:
             STRATEGY_SONIFICATION_RESPECTFUL,
             STRATEGY_DTMF,
             STRATEGY_ENFORCED_AUDIBLE,
+#ifdef SPRD_HARDWARE
+            STRATEGY_FM,
+#endif
             NUM_STRATEGIES
         };
 
@@ -554,6 +557,15 @@ protected:
         bool mHasA2dp; // true on platforms with support for bluetooth A2DP
         bool mHasUsb; // true on platforms with support for USB audio
         bool mHasRemoteSubmix; // true on platforms with support for remote presentation of a submix
+#ifdef SPRD_HARDWARE
+        volatile bool   mDone;
+        pthread_t mThread;
+        bool mHasStartupSound;
+        status_t startReadingThread();
+        void stopReadingThread();
+        static void *ThreadWrapper(void *me);
+        void threadFunc();
+#endif
         audio_devices_t mAttachedOutputDevices; // output devices always available on the platform
         audio_devices_t mDefaultOutputDevice; // output device selected by default at boot time
                                               // (must be in mAttachedOutputDevices)
